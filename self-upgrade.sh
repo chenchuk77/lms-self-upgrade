@@ -13,12 +13,11 @@ exit 0
 
 
 # consts
-SELFUPDATE_HOME=/opt/self-update
+SELFUPGRADE_HOME=/opt/self-upgrade
 WORKSPACE=${SELFUPDATE_HOME}/backups/${TS}-$$
 VALID_CORE_WARS=("lms" "rating" "api-gw" "frontend" "auth")
 VALID_TENANT_WARS=("messaging-worker" "MtsSdpSolutionApi" "sms-broker" "charging-worker")
 VALID_WARS=("${VALID_CORE_WARS[@]}" "${VALID_TENANT_WARS[@]}")
-
 
 # vars
 TS=$(date +%s)
@@ -26,6 +25,7 @@ S3_BUCKET=
 WAR=
 TENANT=
 ELK_HOST=
+LMS_TYPE=
 
 # functions
 function log {
@@ -69,12 +69,12 @@ function read_args {
 }
 
 function input_validation {
-  if [[ -z "S3_BUCKET" ]]; then
+  if [[ -z "${S3_BUCKET}" ]]; then
     log "missing s3 bucket of lms release."
     exit 98
   fi
 
-  if [[ -z "WAR" ]]; then
+  if [[ -z "${WAR}" ]]; then
     log "missing war name."
     exit 97
   fi
@@ -94,27 +94,40 @@ function input_validation {
       log "the war: ${WAR} is a core service and should not used with a tenant."
       exit 94
     fi
+  fi
 
+  if [[ ! -z "${ELK_HOST}" ]]; then
+    if [[ ! "${ELK_HOST}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+      log "the elk address ${ELK_HOST} is invalid."
+      exit 93
+    fi
+  fi
 
-#irx='([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])'
+  log "input parameters validation passed."
 
 }
 
 function in_list {
-  # helper function to check if element $1 doesnt exists in array $2
+  # helper function to check if element $1 exists in array $2
   local e match="$1"
   shift
   for e; do [[ "$e" == "$match" ]] && return 0; done
   return 1
 }
 
-
+function set_lms_type {
+  if [[ -d /opt/lms/apache-tomcat-7.core ]]; then
+    LMS_TYPE="ALLINONE"
+  else
+    LMS_TYPE="DISTRIBUTED"
+  fi
+}
 
 function set_tomcat_home {
   if [[ -z "${TENANT}" ]]; then
     TOMCAT_HOME=/opt/lms/apache-tomcat-7
   elif
-    TOMCAT_HOME=/opt/lms/apache-tomcat-${TENANT}
+    TOMCAT_HOME=/opt/lms/apache-tomcat-7.${TENANT}
   fi
 }
 
@@ -131,14 +144,10 @@ function delete_webapps {
 }
 
 
-function 
-
-./self-upgrade.sh {source-bucket} {service-name}
-
-
-backend
-frontend
-
+read_args
+inpus_validation
+set_lms_type
+set_tomcat_home
 
 HOST_ID="$(hostname)-$(curl ifconfig.io)"
 TS=$(date +%s)
@@ -146,14 +155,6 @@ log "starting a new self-upgrade process with pid $$."
 log "self-upgrade 
 log "source-ip:$(curl ifconfig.io) process starts with pid: $$, artifacts timestamp will be ${TS}"
 
-# from args
-S3_BUCKET=my_bucket
-WAR=
-TENANT=
-
-# consts
-# WORKSPACE is unique with TS and PID. this allows allinone to start multiple
-# processes in the background, each will have its own folder.
 WORKSPACE=${SELFUPDATE_HOME}/backups/${TS}-$$
 SELFUPDATE_HOME=/opt/self-update
 
