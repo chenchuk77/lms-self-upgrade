@@ -10,23 +10,45 @@ exit 0
 # import functions
 source ./functions.sh
 
-# consts and vars
-LMS_TYPE=$(set_lms_type)
-TS=$(date +%s)
+###############################################################################
+# consts
+#
+#
 SELFUPGRADE_HOST=$(curl ifconfig.io)
 SELFUPGRADE_HOME=/opt/self-upgrade
-WORKSPACE=${SELFUPDATE_HOME}/backups/${TS}-$$
 VALID_CORE_WARS=("lms" "rating" "api-gw" "frontend" "auth")
 VALID_TENANT_WARS=("messaging-worker" "MtsSdpSolutionApi" "sms-broker" "charging-worker")
 VALID_WARS=("${VALID_CORE_WARS[@]}" "${VALID_TENANT_WARS[@]}")
 
+###############################################################################
+# vars
+#
+# TS: timestamp for uniquely identify this execution (among with pid). 
+# TS: will be used for rollback.
+# WORKSPACE: 
+# LMS_TYPE: folder structure depends on this.
+#
+TS=$(date +%s)
+WORKSPACE=${SELFUPGRADE_HOME}/backups/${TS}-$$
+LMS_TYPE=$(set_lms_type)
+
+###############################################################################
 # args
+#
+# S3_BUCKET: {--s3}     - s3 path of the lms-release to deploy.
+# WAR:       {--war}    - the tomcat-webapp to be upgraded.
+# TENANT:    [--tenant] - optional: the tenant to be upgraded.
+# ELK_HIST:  [--elk]    - the elastic-search host (for remote logging).
+#
 S3_BUCKET=
 WAR=
 TENANT=
 ELK_HOST=
 
 
+###############################################################################
+# main
+#
 read_args
 inpus_validation
 set_lms_type

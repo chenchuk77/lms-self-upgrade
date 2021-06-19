@@ -97,10 +97,16 @@ function set_lms_type {
 }
 
 function set_tomcat_home {
-  if [[ -z "${TENANT}" ]]; then
+  # distributed lms. tomcat in same place
+  if [[ "${LMS_TYPE}" == "DISTRIBUTED" ]]; then
     TOMCAT_HOME=/opt/lms/apache-tomcat-7
-  elif
-    TOMCAT_HOME=/opt/lms/apache-tomcat-7.${TENANT}
+  else
+    # allinone lms has multiple tomcat instances.
+    if in_list("${WAR}" "${VALID_CORE_WARS[@]}"); then
+      TOMCAT_HOME=/opt/lms/apache-tomcat-7.core
+    else
+      TOMCAT_HOME=/opt/lms/apache-tomcat-7.${TENANT}
+    fi
   fi
 }
 
