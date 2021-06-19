@@ -23,17 +23,31 @@ The script need to accept the path to the lms-release in s3, and the specific wa
 
 ```
 ./self-upgrade --bucket {s3-path-of-lms-release} 
-               --war {lms|rating|api-gw|frontend|auth|messaging-worker|MtsSdpSolutionApi|sms-broker|charging-worker} 
+               --war {lms|rating|api-gw|frontend|auth|
+                      messaging-worker|MtsSdpSolutionApi|
+                      sms-broker|charging-worker} 
                [--tenant {MTN_NG|MTN_CI|AIRTEL_NG|LAB_NETANYA}]
 ```
 
-The "tenant" argument is optional, and should be provided ONLY when upgrading tenant's devices 
 Examples:
+
+
 ```
 ./self-upgrade --s3 lms-releases/J2/OD/L15.00.00 --war lms
+./self-upgrade --s3 lms-releases/J2/OD/L15.00.00 --war api-gw
 ./self-upgrade --s3 lms-releases/J2/OD/L15.00.00 --war rating
+./self-upgrade --s3 lms-releases/J2/OD/L15.00.00 --war auth
+
+```
+
+For tenant specific devices (workers and brokers) the tenant name should be provided: 
+Examples:
+
+
+```
 ./self-upgrade --s3 lms-releases/J2/OD/L15.00.00 --war MtsSdpSolutionApi --tenant MTN_NG
 ./self-upgrade --s3 lms-releases/J2/OD/L15.00.00 --war messaging-worker --tenant MTN_CI
+./self-upgrade --s3 lms-releases/J2/OD/L15.00.00 --war charging-worker --tenant AIRTEL_NG
 ```
 
 
