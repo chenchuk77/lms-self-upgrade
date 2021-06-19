@@ -123,3 +123,34 @@ function delete_webapps {
 }
 
 
+function disable_watchdogs {
+  if systemctl is-active --quiet cron.service; then
+    systemctl stop cron.service
+    log "cron stopped."
+  else
+    log "cron is not running."
+  fi
+  if systemctl is-active --quiet monit.service; then 
+    systemctl stop monit.service
+    log "monit stopped."
+  else
+    log "monit is not running."
+  fi
+}
+
+function enable_watchdogs {
+  if systemctl is-active --quiet monit.service; then  
+    log "monit is already running."
+  else
+    systemctl start monit.service
+    log "monit started."
+  fi
+  if systemctl is-active --quiet cron.service; then
+    log "cron is already running."
+  else
+    systemctl stop cron.service
+    log "cron started."
+  fi
+}
+
+
