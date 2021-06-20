@@ -22,6 +22,7 @@ This project is a self upgrader for lms service.
 1. self-upgraded (the script itself) pull from git before execution - this is good because if changing code in script, no need to ssh to all servers for update the code.
 2. support LMSDB ???
 3. make snapshot before start ?
+4. s3 local artifact caching
 
 ## TODOs:
 1. support restart arg
@@ -70,4 +71,24 @@ Examples:
 ./self-upgrade.sh --s3 lms-releases/J2/OD/L15.00.00 --war messaging-worker --tenant MTN_CI
 ./self-upgrade.sh --s3 lms-releases/J2/OD/L15.00.00 --war charging-worker --tenant AIRTEL_NG
 ```
+
+
+## FS Structure
+
+The project has 2 shared folders used during execution:
+1. backups folder is used to backup the current war before upgrading. It will also be used for rollbacks.
+2. workspace folder is temporary
+
+The {TS} and {PID} used to uniquely identify this exact process. The TS-PID will be used as an index for remote logging.
+
+Example:
+
+# project home
+/opt/self-upgrade/
+
+# folders
+/opt/self-upgrade/backups/${TS}-${pid}
+/opt/self-upgrade/workspace/${TS}-${pid}
+
+
 

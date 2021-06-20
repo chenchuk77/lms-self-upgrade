@@ -153,4 +153,7 @@ function enable_watchdogs {
   fi
 }
 
-
+function download_artifact {
+  aws s3 cp s3://${S3_BUCKET}/${WAR}.war $2 --quiet
+    
+}

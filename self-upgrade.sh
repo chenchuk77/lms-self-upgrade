@@ -10,6 +10,10 @@ exit 0
 # import functions
 source ./functions.sh
 
+# load aws credentials
+source ./credentials.aws
+
+
 ###############################################################################
 # consts
 #
@@ -53,6 +57,10 @@ read_args
 inpus_validation
 set_lms_type
 set_tomcat_home
+
+download_artifact
+
+
 
 HOST_ID="$(hostname)-$(curl ifconfig.io)"
 TS=$(date +%s)
