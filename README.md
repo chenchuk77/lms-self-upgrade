@@ -29,6 +29,10 @@ This project is a self upgrader for lms service.
 2. check elk address pattern for regexp
 3. get elk integration (olivier)
 4. snapshot e2e for testing (on env75)
+5. display old/new war version from MANIFEST file
+6. add and display script version, if pulling from git in runtime.
+
+
 
 ## Links:
 [elk example]: https://makeitnew.io/log-to-elasticsearch-using-curl-db8bf8ef2785

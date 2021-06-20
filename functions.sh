@@ -35,6 +35,16 @@ EOF
   fi
 }
 
+function get_all_logs {
+  curl --silent -u ${ELK_USER}:${ELK_PASSWORD} \
+          ${ELK_URL}/${ELK_INDEX}/_doc/_search?pretty=true \
+          -H 'Content-Type: application/json' \
+          -d '{    "query": {
+        "query_string": {"query": "*"}
+    }
+}' | jq '.hits.hits[]._source | [.unique_id, .client_ip, .message_text ] | @csv' | tr -d '"\'
+
+}
 
 
 
