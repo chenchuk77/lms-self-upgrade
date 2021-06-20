@@ -20,6 +20,7 @@ source ./credentials.aws
 #
 SELFUPGRADE_HOST=$(curl ifconfig.io)
 SELFUPGRADE_HOME=/opt/self-upgrade
+VALID_TENANTS=("MTN_NG" "MTN_CI" "AIRTEL_NG" "LAB_NETANYA")
 VALID_CORE_WARS=("lms" "rating" "api-gw" "frontend" "auth")
 VALID_TENANT_WARS=("messaging-worker" "MtsSdpSolutionApi" "sms-broker" "charging-worker")
 VALID_WARS=("${VALID_CORE_WARS[@]}" "${VALID_TENANT_WARS[@]}")
@@ -33,8 +34,11 @@ VALID_WARS=("${VALID_CORE_WARS[@]}" "${VALID_TENANT_WARS[@]}")
 # LMS_TYPE: folder structure depends on this.
 #
 TS=$(date +%s)
-WORKSPACE=${SELFUPGRADE_HOME}/backups/${TS}-$$
+#WORKSPACE=${SELFUPGRADE_HOME}/workspaces/${TS}-$$
+WORKSPACE=/tmp/workspace/${TS}-$$
+BACKUP_FOLDER=${SELFUPGRADE_HOME}/backups/${TS}-$$
 LMS_TYPE=$(set_lms_type)
+ELK_INDEX="lms-self-upgrade-$(date +%Y-%m)"
 
 ###############################################################################
 # args
@@ -42,51 +46,37 @@ LMS_TYPE=$(set_lms_type)
 # S3_BUCKET: {--s3}     - s3 path of the lms-release to deploy.
 # WAR:       {--war}    - the tomcat-webapp to be upgraded.
 # TENANT:    [--tenant] - optional: the tenant to be upgraded.
-# ELK_HIST:  [--elk]    - the elastic-search host (for remote logging).
+# ELK_HOST:  [--elk]    - the elastic-search host (for remote logging).
 #
 S3_BUCKET=
 WAR=
 TENANT=
 ELK_HOST=
 
-
 ###############################################################################
 # main
 #
 read_args
-inpus_validation
-set_lms_type
+input_validation
+setup_environment
 set_tomcat_home
 
-download_artifact
-
-
-
-HOST_ID="$(hostname)-$(curl ifconfig.io)"
-TS=$(date +%s)
-log "starting a new self-upgrade process with pid $$."
-log "self-upgrade 
-log "source-ip:$(curl ifconfig.io) process starts with pid: $$, artifacts timestamp will be ${TS}"
-
-WORKSPACE=${SELFUPDATE_HOME}/backups/${TS}-$$
-SELFUPDATE_HOME=/opt/self-update
-
-
-mkdir -p ${WORKSPACE}
-
-get_tomcat_home
+log "starting a new lms-self-upgrade process with id: ${TS}-$$."
+log "process will upgrade the webapp: ${WAR}."
+log "source s3 busket: ${S3_BUCKET}."
+log "this lms is : ${LMS_TYPE}." 
 log "using TOMCAT_HOME=${TOMCAT_HOME}."
 
-#backup_webapps
-cp ${TOMCAT_HOME}/webapps/${WAR}.war ${WORKSPACE}
-cp ${TOMCAT_HOME}/conf/Catalina/localhost/xxx.xml ${WORKSPACE}
+download_artifact
+disable_watchdogs
 
-#delete_webapps
-rm -rf ${TOMCAT_HOME}/work/*
-rm -rf ${TOMCAT_HOME}/temp/*
-rm -rf ${TOMCAT_HOME}/webapps/${WAR}
-rm -rf ${TOMCAT_HOME}/webapps/${WAR}.war
-
+# check allinone
+stop_tomcat
+backup_tomcat
+delete_webapp
+upgrade_webapp
+start_tomcat
+enable_watchdog
 
 
 

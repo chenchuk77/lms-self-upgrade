@@ -43,7 +43,7 @@ The script need to accept the path to the lms-release in s3, and the specific wa
 
 ```
 
-./self-upgrade.sh --bucket {s3-path-of-lms-release} 
+./self-upgrade.sh --s3  {s3-path-of-lms-release} 
                   --war {lms|rating|api-gw|frontend|auth|
                          messaging-worker|MtsSdpSolutionApi|
                          sms-broker|charging-worker} 

@@ -3,12 +3,40 @@
 # This file is contains functions,
 # it should be sourced from the self-upgrade.sh script.
 
+#function log {
+#  MESSAGE=$1
+#  echo $MESSAGE
+#  CURL_JSON="{host-id: {$HOST_ID}, msg: ${MESSAGE}}"
+#  # TODO: curl to elastic search for logging
+#}
+
 function log {
-  MESSAGE=$1
-  echo $MESSAGE
-  CURL_JSON="{host-id: {$HOST_ID}, msg: ${MESSAGE}}"
-  # TODO: curl to elastic search for logging
+  MESSAGE_TEXT=$1
+  MESSAGE_DATE=$(date '+%Y/%m/%d %H:%M:%S')
+  echo "${MESSAGE_DATE} [${TS}-${PID}] : ${MESSAGE_TEXT}" >> ${SELFUPGRADE_HOME}/upgrader.log
+
+  if [[ ! -z "${ELK_HOST}" ]]; then
+    # logging also to remote elastic-search
+    curl -u ${ELK_USER}:${ELK_PASSWORD} \
+            ${ELK_URL}/${ELK_INDEX}/_doc \
+           -XPOST \
+           -H 'Content-Type: application/json' \
+           -d "$(cat <<EOF
+{
+  "pid": "${PID}",
+  "process_ts": "${TS}",
+  "unique_id": "${TS}-${PID}",
+  "client_ip": "${HOST}",
+  "message_time": "${MESSAGE_DATE}",
+  "message_text": "${MESSAGE_TEXT}"
 }
+EOF
+                )" >> /dev/null 2>&1
+  fi
+}
+
+
+
 
 function read_args {
   POSITIONAL=()
@@ -65,20 +93,32 @@ function input_validation {
       exit 95
     fi
   else
+    if in_list("${TENANT}" "${VALID_TENANTS[@]}"); then
+      log "the tenant: ${TENANT} is not supported. valid tenants are [ ${VALID_TENANTS[@]} ]."
+      exit 94
+    fi
+
     if in_list("${WAR}" "${VALID_CORE_WARS[@]}"); then
       log "the war: ${WAR} is a core service and should not used with a tenant."
-      exit 94
+      exit 93
     fi
   fi
 
   if [[ ! -z "${ELK_HOST}" ]]; then
     if [[ ! "${ELK_HOST}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
       log "the elk address ${ELK_HOST} is invalid."
-      exit 93
+      exit 92
     fi
   fi
   log "input parameters validation passed."
 }
+
+function setup_environment {
+  mkdir -p ${WORKSPACE}
+  mkdir -p ${BACKUP_FOLDER}
+  log "execution folders created for ${TS}-$$."
+}
+
 
 function in_list {
   # helper function to check if element $1 exists in array $2
@@ -115,13 +155,16 @@ function backup_tomcat {
   cp ${TOMCAT_HOME}/conf/Catalina/localhost/xxx.xml ${WORKSPACE}
 }
 
-function delete_webapps {
+function delete_webapp {
   rm -rf ${TOMCAT_HOME}/work/*
   rm -rf ${TOMCAT_HOME}/temp/*
   rm -rf ${TOMCAT_HOME}/webapps/${WAR}
   rm -rf ${TOMCAT_HOME}/webapps/${WAR}.war
 }
 
+function upgrade_webapp {
+  cp ${WORKSPACE}/${WAR}.war ${TOMCAT_HOME}/webapps
+}
 
 function disable_watchdogs {
   if systemctl is-active --quiet cron.service; then
@@ -148,12 +191,19 @@ function enable_watchdogs {
   if systemctl is-active --quiet cron.service; then
     log "cron is already running."
   else
-    systemctl stop cron.service
+    systemctl start cron.service
     log "cron started."
   fi
 }
 
 function download_artifact {
-  aws s3 cp s3://${S3_BUCKET}/${WAR}.war $2 --quiet
-    
+  log "downolading ${WAR} from ${S3_BUCKET} ..."
+  aws s3 cp s3://${S3_BUCKET}/${WAR}.war ${WORKSPACE} --quiet
+  log "download finished successfuly."
 }
+
+function hello {
+  echo hello
+}
+
+
