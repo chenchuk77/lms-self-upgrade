@@ -23,6 +23,8 @@ This project is a self upgrader for lms service.
 2. support LMSDB ???
 3. make snapshot before start ?
 4. s3 local artifact caching
+5. print versions from MANIFEST and from API before upgrade (cannot do after because tomcat may not be restarted)
+
 
 ## TODOs:
 1. support restart arg
@@ -31,7 +33,7 @@ This project is a self upgrader for lms service.
 4. snapshot e2e for testing (on env75)
 5. display old/new war version from MANIFEST file
 6. add and display script version, if pulling from git in runtime.
-
+7. support non-tomcat services (frontend, sms-broker)
 
 
 ## Links:

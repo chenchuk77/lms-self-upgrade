@@ -19,6 +19,7 @@ source ./credentials.aws
 # consts
 #
 #
+VERSION=1.01
 SELFUPGRADE_HOST=$(curl ifconfig.io)
 SELFUPGRADE_HOME=/opt/self-upgrade
 VALID_TENANTS=("MTN_NG" "MTN_CI" "AIRTEL_NG" "LAB_NETANYA")
