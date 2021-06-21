@@ -9,6 +9,7 @@ exit 0
 
 # import functions
 source ./functions.sh
+source ./helper-functions.sh
 
 # load aws credentials
 source ./credentials.aws
@@ -56,27 +57,43 @@ ELK_HOST=
 ###############################################################################
 # main
 #
+
+# setup execution environment
 read_args
 input_validation
 setup_environment
 set_tomcat_home
 
+# logging execution details
 log "starting a new lms-self-upgrade process with id: ${TS}-$$."
 log "process will upgrade the webapp: ${WAR}."
 log "source s3 busket: ${S3_BUCKET}."
 log "this lms is : ${LMS_TYPE}." 
 log "using TOMCAT_HOME=${TOMCAT_HOME}."
 
+# downloading lms release
 download_artifact
-disable_watchdogs
 
-# check allinone
+# disable services before upgrading
+disable_watchdogs
 stop_tomcat
+
+# replacing files
 backup_tomcat
 delete_webapp
 upgrade_webapp
-start_tomcat
-enable_watchdog
+
+# start tomcat if its the last self-upgrade process on this tomcat instance 
+RUNNING_PROC=$(count_processes)
+if [[ "${RUNNING_PROC}" > 1 ]]; then
+  log "there are more $((RUNNING_PROC-1)) self-upgrade processes. will not start tomcat."
+  log "done."
+else
+  log "this is the last self-upgrade process, starting tomcat ..."
+  start_tomcat
+  enable_watchdog
+  log "done."
+fi
 
 
 

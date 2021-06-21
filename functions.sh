@@ -116,15 +116,6 @@ function setup_environment {
   log "execution folders created for ${TS}-$$."
 }
 
-
-function in_list {
-  # helper function to check if element $1 exists in array $2
-  local e match="$1"
-  shift
-  for e; do [[ "$e" == "$match" ]] && return 0; done
-  return 1
-}
-
 function set_lms_type {
   if [[ -d /opt/lms/apache-tomcat-7.core ]]; then
     LMS_TYPE="ALLINONE"
@@ -190,6 +181,46 @@ function enable_watchdogs {
   else
     systemctl start cron.service
     log "cron started."
+  fi
+}
+
+function start_tomcat {
+  # set systemd unit name
+  if [[ "${LMS_TYPE}" == "ALLINONE" ]]; then
+    if in_list("${WAR}" "${VALID_CORE_WARS[@]}"); then
+      TOMCAT_SERVICE_NAME=tomcat.core.service
+    else
+      TOMCAT_SERVICE_NAME=tomcat.${TENANT}.service
+    fi
+  else
+    TOMCAT_SERVICE_NAME=tomcat.service
+  fi
+  # start systemd unit
+  if systemctl is-active --quiet ${TOMCAT_SERVICE_NAME}; then
+    log "${TOMCAT_SERVICE_NAME} is already running."
+  else
+    systemctl start ${TOMCAT_SERVICE_NAME}
+    log "${TOMCAT_SERVICE_NAME} started."
+  fi
+}
+
+function stop_tomcat {
+  # set systemd unit name
+  if [[ "${LMS_TYPE}" == "ALLINONE" ]]; then
+    if in_list("${WAR}" "${VALID_CORE_WARS[@]}"); then
+      TOMCAT_SERVICE_NAME=tomcat.core.service
+    else
+      TOMCAT_SERVICE_NAME=tomcat.${TENANT}.service
+    fi
+  else
+    TOMCAT_SERVICE_NAME=tomcat.service
+  fi
+  # stop systemd unit
+  if systemctl is-active --quiet ${TOMCAT_SERVICE_NAME}; then
+    systemctl stop ${TOMCAT_SERVICE_NAME}
+    log "${TOMCAT_SERVICE_NAME} stopped."
+  else
+    log "${TOMCAT_SERVICE_NAME} is not running."
   fi
 }
 
