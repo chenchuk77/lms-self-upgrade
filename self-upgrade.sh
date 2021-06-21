@@ -11,9 +11,9 @@ exit 0
 source ./functions.sh
 source ./helper-functions.sh
 
-# load aws credentials
+# load credentials
 source ./credentials.aws
-
+source ./credentials.elk
 
 ###############################################################################
 # consts
