@@ -4,12 +4,27 @@
 # it should be sourced from the self-upgrade.sh script.
 
 function in_list {
-  # helper function to check if element $1 exists in array $2
-  local e match="$1"
-  shift
-  for e; do [[ "$e" == "$match" ]] && return 0; done
+  # check if item $1 in list $2
+  ITEM_AND_LIST=("$@")
+  ITEM="${ITEM_AND_LIST[0]}"
+  LIST=("${ITEM_AND_LIST[@]}")
+  unset LIST[0]
+  for ELEMENT in ${LIST[@]}; do
+    if [[ "${ELEMENT}" == "${ITEM}"  ]]; then
+      return 0
+    fi
+  done
   return 1
 }
+
+
+#function in_list {
+#  # helper function to check if element $1 exists in array $2
+#  local e match="$1"
+#  shift
+#  for e; do [[ "$e" == "$match" ]] && return 0; done
+#  return 1
+#}
 
 function count_processes {
   # this will be used to conditionally restart tomcat only if its the last webapp (among other processes).
@@ -22,5 +37,4 @@ function count_processes {
   fi
   return ${NUM_PROC}
 }
-
 
