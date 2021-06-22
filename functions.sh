@@ -15,7 +15,7 @@ function log {
   MESSAGE_DATE=$(date '+%Y/%m/%d %H:%M:%S')
   echo "${MESSAGE_DATE} [${TS}-${PID}] : ${MESSAGE_TEXT}" >> ${SELFUPGRADE_HOME}/upgrader.log
 
-  if [[ ! -z "${ELK_HOST}" ]]; then
+  if [[ ! -z "${ELK_URL}" ]]; then
     # logging also to remote elastic-search
     curl -u ${ELK_USER}:${ELK_PASSWORD} \
             ${ELK_URL}/${ELK_INDEX}/_doc \
@@ -79,23 +79,23 @@ function input_validation {
     exit 97
   fi
 
-  if ! in_list("${WAR}" "${VALID_WARS[@]}"); then 
+  if ! in_list "${WAR}" "${VALID_WARS[@]}"; then 
     log "the war: ${WAR} is not supported."
     exit 96
   fi
 
   if [[ -z "${TENANT}" ]]; then
-    if in_list("${WAR}" "${VALID_TENANT_WARS[@]}"); then
+    if in_list "${WAR}" "${VALID_TENANT_WARS[@]}"; then
       log "the war: ${WAR} must be used with a tenant."
       exit 95
     fi
   else
-    if in_list("${TENANT}" "${VALID_TENANTS[@]}"); then
+    if in_list "${TENANT}" "${VALID_TENANTS[@]}"; then
       log "the tenant: ${TENANT} is not supported. valid tenants are [ ${VALID_TENANTS[@]} ]."
       exit 94
     fi
 
-    if in_list("${WAR}" "${VALID_CORE_WARS[@]}"); then
+    if in_listi "${WAR}" "${VALID_CORE_WARS[@]}"; then
       log "the war: ${WAR} is a core service and should not used with a tenant."
       exit 93
     fi
@@ -116,31 +116,33 @@ function setup_environment {
   log "execution folders created for ${TS}-$$."
 }
 
-function set_lms_type {
+function get_lms_type {
   if [[ -d /opt/lms/apache-tomcat-7.core ]]; then
     LMS_TYPE="ALLINONE"
   else
     LMS_TYPE="DISTRIBUTED"
   fi
+  echo "${LMS_TYPE}"
 }
 
-function set_tomcat_home {
+function get_tomcat_home {
   # distributed lms. tomcat in same place
   if [[ "${LMS_TYPE}" == "DISTRIBUTED" ]]; then
     TOMCAT_HOME=/opt/lms/apache-tomcat-7
   else
     # allinone lms has multiple tomcat instances.
-    if in_list("${WAR}" "${VALID_CORE_WARS[@]}"); then
+    if in_list "${WAR}" "${VALID_CORE_WARS[@]}"; then
       TOMCAT_HOME=/opt/lms/apache-tomcat-7.core
     else
       TOMCAT_HOME=/opt/lms/apache-tomcat-7.${TENANT}
     fi
   fi
+  echo "${TOMCAT_HOME}"
 }
 
 function backup_tomcat {
   cp ${TOMCAT_HOME}/webapps/${WAR}.war ${WORKSPACE}
-  cp ${TOMCAT_HOME}/conf/Catalina/localhost/xxx.xml ${WORKSPACE}
+  #cp ${TOMCAT_HOME}/conf/Catalina/localhost/xxx.xml ${WORKSPACE}
 }
 
 function delete_webapp {
@@ -187,7 +189,7 @@ function enable_watchdogs {
 function start_tomcat {
   # set systemd unit name
   if [[ "${LMS_TYPE}" == "ALLINONE" ]]; then
-    if in_list("${WAR}" "${VALID_CORE_WARS[@]}"); then
+    if in_list "${WAR}" "${VALID_CORE_WARS[@]}"; then
       TOMCAT_SERVICE_NAME=tomcat.core.service
     else
       TOMCAT_SERVICE_NAME=tomcat.${TENANT}.service
@@ -207,7 +209,7 @@ function start_tomcat {
 function stop_tomcat {
   # set systemd unit name
   if [[ "${LMS_TYPE}" == "ALLINONE" ]]; then
-    if in_list("${WAR}" "${VALID_CORE_WARS[@]}"); then
+    if in_list "${WAR}" "${VALID_CORE_WARS[@]}"; then
       TOMCAT_SERVICE_NAME=tomcat.core.service
     else
       TOMCAT_SERVICE_NAME=tomcat.${TENANT}.service

@@ -33,6 +33,7 @@ ELK_INDEX="lms-self-upgrade-$(date +%Y-%m)"
 # WORKSPACE: 
 # LMS_TYPE: folder structure depends on this.
 #
+PID=$$
 TS=$(date +%s)
 #WORKSPACE=${SELFUPGRADE_HOME}/workspaces/${TS}-$$
 WORKSPACE=/tmp/workspace/${TS}-$$
@@ -46,7 +47,7 @@ TOMCAT_HOME=
 # S3_BUCKET: {--s3}     - s3 path of the lms-release to deploy.
 # WAR:       {--war}    - the tomcat-webapp to be upgraded.
 # TENANT:    [--tenant] - optional: the tenant to be upgraded.
-# ELK_HOST:  [--elk]    - the elastic-search host (for remote logging).
+# ELK_URL:   [--elk]    - the elastic-search host (for remote logging).
 #
 S3_BUCKET=
 WAR=
@@ -73,7 +74,7 @@ while [[ $# -gt 0 ]]; do
       TENANT="$2"
       shift; shift ;;
     --elk)
-      ELK_HOST="$2"
+      ELK_URL="$2"
       shift; shift ;;
     --default)
       DEFAULT=YES
