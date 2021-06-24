@@ -1,4 +1,4 @@
-cred*
+credentials/cred*
 elk.howto
 upgrader.log
 send-inline-json.sh
