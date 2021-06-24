@@ -7,7 +7,7 @@ UNIQUE_ID=$1
 ELK_INDEX="lms-self-upgrade-$(date +%Y-%m)"
 
 # load aws credentials
-source ./credentials.elk
+source ./credentials/credentials.elk
 
 function get_all_logs {
   curl -u ${ELK_USER}:${ELK_PASSWORD} \

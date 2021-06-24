@@ -11,7 +11,7 @@ exit 0
 source ./functions.sh
 
 # load aws credentials
-source ./credentials.aws
+source ./credentials/credentials.aws
 
 
 ###############################################################################

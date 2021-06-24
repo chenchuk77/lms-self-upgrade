@@ -8,7 +8,7 @@ HOST=$(curl -ss ifconfig.io)
 PID=$$
 
 # load aws credentials
-source ./credentials.elk
+source ./credentials/credentials.elk
 
 function log {
   MESSAGE_TEXT=$1

@@ -9,8 +9,8 @@ source ./helper-functions.sh
 source ./functions.sh
 
 # load credentials
-source ./credentials.aws
-source ./credentials.elk
+source ./credentials/credentials.aws
+source ./credentials/credentials.elk
 
 ###############################################################################
 # consts
