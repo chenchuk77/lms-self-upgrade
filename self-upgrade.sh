@@ -18,7 +18,7 @@ source ./credentials.elk
 #
 VERSION=1.07
 SELFUPGRADE_HOST=$(curl ifconfig.io)
-SELFUPGRADE_HOME=/opt/self-upgrade
+SELFUPGRADE_HOME=/opt/lms-self-upgrade
 VALID_TENANTS=("MTN_NG" "MTN_CI" "AIRTEL_NG" "LAB_NETANYA")
 VALID_CORE_WARS=("lms" "rating" "api-gw" "frontend" "auth")
 VALID_TENANT_WARS=("messaging-worker" "MtsSdpSolutionApi" "sms-broker" "charging-worker")
