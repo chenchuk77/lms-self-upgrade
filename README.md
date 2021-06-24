@@ -34,7 +34,7 @@ This project is a self upgrader for lms service.
 5. display old/new war version from MANIFEST file
 6. add and display script version, if pulling from git in runtime.
 7. support non-tomcat services (frontend, sms-broker)
-
+8. add private ip to logfile
 
 ## Links:
 [elk example]: https://makeitnew.io/log-to-elasticsearch-using-curl-db8bf8ef2785

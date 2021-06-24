@@ -11,6 +11,7 @@
 #}
 
 function log {
+  set +x
   MESSAGE_TEXT=$1
   MESSAGE_DATE=$(date '+%Y/%m/%d %H:%M:%S')
   echo "${MESSAGE_DATE} [${TS}-${PID}] : ${MESSAGE_TEXT}" >> ${SELFUPGRADE_HOME}/upgrader.log
@@ -33,6 +34,7 @@ function log {
 EOF
                 )" >> /dev/null 2>&1
   fi
+  set -x
 }
 
 function read_args {
@@ -141,8 +143,11 @@ function get_tomcat_home {
 }
 
 function backup_tomcat {
-  cp ${TOMCAT_HOME}/webapps/${WAR}.war ${WORKSPACE}
-  #cp ${TOMCAT_HOME}/conf/Catalina/localhost/xxx.xml ${WORKSPACE}
+  cp ${TOMCAT_HOME}/webapps/${WAR}.war ${BACKUP_FOLDER}
+  if [[ -f "${TOMCAT_HOME}/conf/Catalina/localhost/${WAR}.xml" ]]; then
+    cp ${TOMCAT_HOME}/conf/Catalina/localhost/${WAR}.xml ${BACKUP_FOLDER}
+  fi
+  log "old war saved into ${BACKUP_FOLDER}"
 }
 
 function delete_webapp {
@@ -219,9 +224,21 @@ function stop_tomcat {
   fi
   # stop systemd unit
   if systemctl is-active --quiet ${TOMCAT_SERVICE_NAME}; then
-    systemctl stop ${TOMCAT_SERVICE_NAME}
+    log "stopping ${TOMCAT_SERVICE_NAME} ...."
+    systemctl stop ${TOMCAT_SERVICE_NAME}  
+    while [ $? -ne 0 ]; do
+      # wait until success
+      log "stopping ${TOMCAT_SERVICE_NAME} failed, retry in 10s"
+      sleep 10s
+      systemctl stop ${TOMCAT_SERVICE_NAME}  
+    done
     log "${TOMCAT_SERVICE_NAME} stopped."
   else
+    STILL_ACTIVE_TOMCAT=$(ps -ef | grep tomcat | grep core | wc -l)
+    while [[ "${STILL_ACTIVE_TOMCAT}" == "1" ]]; do
+      log "tomcat is still going down ... waiting 10s ..."
+      sleep 10s
+    done
     log "${TOMCAT_SERVICE_NAME} is not running."
   fi
 }
