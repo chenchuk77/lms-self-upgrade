@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -x
 
 # This script is used for self-upgrade for lms services.
 # it designed to run as a daemon process, and allows multiple instances to run in parallel.
@@ -16,7 +16,7 @@ source ./credentials.elk
 # consts
 #
 #
-VERSION=1.07
+VERSION=1.10
 SELFUPGRADE_HOST=$(curl ifconfig.io)
 SELFUPGRADE_HOME=/opt/self-upgrade
 VALID_TENANTS=("MTN_NG" "MTN_CI" "AIRTEL_NG" "LAB_NETANYA")
@@ -40,6 +40,7 @@ WORKSPACE=/tmp/workspace/${TS}-$$
 BACKUP_FOLDER=${SELFUPGRADE_HOME}/backups/${TS}-$$
 LMS_TYPE=
 TOMCAT_HOME=
+log "starting a new lms-self-upgrade [v${VERSION}] process with id: ${TS}-$$."
 
 ###############################################################################
 # args
@@ -58,7 +59,7 @@ ELK_HOST=
 # main
 #
 
-# parse command lime args
+log "parsing command line args ..."
 POSITIONAL=()
 while [[ $# -gt 0 ]]; do
   key="$1"
@@ -89,6 +90,9 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+# mitigate race conditions
+random_delay
 
 # setup execution environment
 input_validation
@@ -123,7 +127,7 @@ if [[ "${RUNNING_PROC}" > 1 ]]; then
 else
   log "this is the last self-upgrade process, starting tomcat ..."
   start_tomcat
-  enable_watchdog
+  enable_watchdogs
   log "done."
 fi
 
