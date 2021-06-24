@@ -20,11 +20,10 @@ This project is a self upgrader for lms service.
 
 ## Considerable features:
 1. self-upgraded (the script itself) pull from git before execution - this is good because if changing code in script, no need to ssh to all servers for update the code.
-2. support LMSDB ???
+2. support LMSDB upgrade
 3. make snapshot before start ?
 4. s3 local artifact caching
 5. print versions from MANIFEST and from API before upgrade (cannot do after because tomcat may not be restarted)
-
 
 ## TODOs:
 1. support restart arg
@@ -35,6 +34,9 @@ This project is a self upgrader for lms service.
 6. add and display script version, if pulling from git in runtime.
 7. support non-tomcat services (frontend, sms-broker)
 8. add private ip to logfile
+9. (ilan) add links to see services per environment
+10. (ilan) add insructions to fetch logs from elk
+11. (ilan) rollback + doc 
 
 ## Links:
 [elk example]: https://makeitnew.io/log-to-elasticsearch-using-curl-db8bf8ef2785
