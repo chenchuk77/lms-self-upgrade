@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# get logs of 10 last minutes
+LAST_N_MINUTES=$1
+if [[ -z "${LAST_N_MINUTES}" ]]; then
+  LAST_N_MINUTES=10  
+fi
+
 # fetching logs of this month ONLY
 ELK_INDEX="lms-self-upgrade-$(date +%Y-%m)"
 
@@ -7,12 +13,12 @@ ELK_INDEX="lms-self-upgrade-$(date +%Y-%m)"
 source ./credentials/credentials.elk
 
 function query {
-  cat <<'EOF'
+  cat <<EOF
 {
  "query": {
   "range" : {
    "message_time" : {
-    "gte" : "now-1000m"
+    "gte" : "now-${LAST_N_MINUTES}m"
    }
   }
  }
@@ -30,4 +36,4 @@ function get_unique_ids {
 
 }
 
-get_unique_ids
+get_unique_ids ${LAST_N_MINUTES}
