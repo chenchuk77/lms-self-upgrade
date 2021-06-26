@@ -9,13 +9,11 @@ ELK_INDEX="lms-self-upgrade-$(date +%Y-%m)"
 source ./credentials/credentials.elk
 
 function query {
-  cat <<'EOF'
-{
+  cat <<EOF
+{ 
  "query": {
-  "range" : {
-   "message_time" : {
-    "gte" : "now-1000m"
-   }
+  "query_string": {
+   "query": "*"
   }
  }
 }
@@ -32,3 +30,4 @@ function get_all_logs {
 }
 
 get_all_logs
+

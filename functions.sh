@@ -27,7 +27,7 @@ function log {
   "pid": "${PID}",
   "process_ts": "${TS}",
   "unique_id": "${TS}-${PID}",
-  "client_ip": "${HOST}",
+  "client_ip": "${SELFUPGRADE_HOST}",
   "message_time": "${MESSAGE_DATE}",
   "message_text": "${MESSAGE_TEXT}"
 }
