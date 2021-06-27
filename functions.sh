@@ -97,7 +97,7 @@ function input_validation {
       exit 94
     fi
 
-    if in_listi "${WAR}" "${VALID_CORE_WARS[@]}"; then
+    if in_list "${WAR}" "${VALID_CORE_WARS[@]}"; then
       log "the war: ${WAR} is a core service and should not used with a tenant."
       exit 93
     fi
