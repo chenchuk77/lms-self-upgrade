@@ -92,7 +92,7 @@ function input_validation {
       exit 95
     fi
   else
-    if in_list "${TENANT}" "${VALID_TENANTS[@]}"; then
+    if ! in_list "${TENANT}" "${VALID_TENANTS[@]}"; then
       log "the tenant: ${TENANT} is not supported. valid tenants are [ ${VALID_TENANTS[@]} ]."
       exit 94
     fi
