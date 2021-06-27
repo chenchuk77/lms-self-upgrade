@@ -1,0 +1,9 @@
+
+1. verify aws cli v2 is installed
+2. create credentials/credentials.elk
+3. create credentials/credentials.aws
+4. 
+
+0
+0. clone the repo https://github.com/chenchuk77/lms-self-upgrade.git
+0. sudo -i; cd /opt/; git clone https://github.com/chenchuk77/lms-self-upgrade.git
